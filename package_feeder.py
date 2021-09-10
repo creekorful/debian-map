@@ -1,6 +1,9 @@
 import itertools as it
+import os
 import sys
 from email.parser import Parser
+
+from arango import ArangoClient
 
 if __name__ == '__main__':
     packages = []
