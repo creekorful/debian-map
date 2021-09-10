@@ -20,7 +20,8 @@ if __name__ == '__main__':
                 }
 
                 for (k, v) in values.items():
-                    if k in ['Depends', 'Pre-Depends', 'Tag']:
+                    if k in ['Breaks', 'Depends', 'Pre-Depends', 'Provides', 'Recommends', 'Replaces', 'Suggests',
+                             'Tag']:
                         package[k] = v.replace('\n', '').split(', ')
                     else:
                         package[k] = v
@@ -31,12 +32,23 @@ if __name__ == '__main__':
                 if section not in sections:
                     sections.append(section)
 
-                # Process the ownership
+                # Process the ownerships
                 ownerships.append({
-                    '_key': 'packages-{}-to-sections-{}'.format(package['_key'], section['_key']),
+                    '_key': 'package-{}-section'.format(package['_key']),
                     '_from': 'packages/{}'.format(package['_key']),
                     '_to': 'sections/{}'.format(section['_key'])
                 })
+
+                if 'Depends' in package:
+                    for depend in package['Depends']:
+                        # Remove version specifier and manage OR.
+                        for depend in depend.split('(')[0].replace(' ', '').split('|'):
+                            depend = depend.split(':')[0]  # In case we have :any specifier f.e
+                            ownerships.append({
+                                '_key': 'package-{}-depends-{}'.format(package['_key'], depend),
+                                '_from': 'packages/{}'.format(package['_key']),
+                                '_to': 'packages/{}'.format(depend)
+                            })
 
     client = ArangoClient(hosts=os.environ.get('ARANGO_HOST'))
     db = client.db(os.environ.get('ARANGO_DB'),
