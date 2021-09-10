@@ -1,5 +1,6 @@
-import ldap
 import os
+
+import ldap
 from arango import ArangoClient
 
 if __name__ == '__main__':
@@ -16,12 +17,12 @@ if __name__ == '__main__':
 
         developers.append(developer)
 
-    # Push the developers into ArangoDB
     client = ArangoClient(hosts=os.environ.get('ARANGO_HOST'))
     db = client.db(os.environ.get('ARANGO_DB'),
                    username=os.environ.get('ARANGO_USER'),
                    password=os.environ.get('ARANGO_PASS'))
 
+    # Push the developers into ArangoDB
     col = db.collection('developers')
     col.insert_many(developers, overwrite=True)
 
